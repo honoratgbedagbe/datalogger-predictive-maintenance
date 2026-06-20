@@ -1,65 +1,43 @@
-# Datalogger Industriel Intelligent pour Maintenance Prédictive
+# Intelligent Industrial Datalogger for Predictive Maintenance
 
-**Plateforme polyvalente de surveillance et de diagnostic des machines tournantes par TinyML embarqué**
+**Polyvalent embedded platform for rotating machinery monitoring with TinyML**
 
----
+## Objective
 
-## Objectif
+Predictive maintenance for industrial rotating machinery (pumps, motors, compressors, fans, gearboxes) by detecting vibration, thermal and electrical anomalies before they cause costly downtime.
 
-Permettre la maintenance prédictive des machines tournantes industrielles (pompes, moteurs électriques, compresseurs, ventilateurs, boîtes de vitesses) en détectant les anomalies vibratoires, thermiques et électriques avant qu'elles ne provoquent un arrêt coûteux.
+## Key Features
 
----
+- **Multi-physics acquisition**: 3-axis vibration (MEMS accelerometer), surface temperature, motor stator current.
+- **On-board AI (TinyML)**: Autoencoder trained on normal data, running locally on the microcontroller.
+- **Granular fault diagnosis**: Identifies the fault type (imbalance, misalignment, bearing defect, cavitation, electrical fault) and the likely faulty component.
+- **Remaining Useful Life (RUL)**: Estimates the time before failure with a confidence interval.
+- **Automatic protection**: Emergency stop or load shedding when critical thresholds are reached.
+- **Industrial communication**: Modbus TCP via Ethernet, embedded cognitive web server.
+- **Local storage**: SD card with timestamped event log and raw data in CSV format.
+- **Reconfigurable**: TinyML model can be changed for different machines without hardware modifications.
 
-## Fonctions principales
+## Hardware
 
-1. **Acquisition multi-physique** : vibrations 3 axes (accéléromètre MEMS), température de surface, courant statorique moteur.
-2. **Analyse embarquée par intelligence artificielle** (TinyML) : auto-encodeur entraîné sur données normales, exécuté localement sur microcontrôleur.
-3. **Diagnostic granulaire** : identification du type de défaut (balourd, désalignement, défaut de roulement, cavitation, défaut électrique) et du composant probable.
-4. **Pronostic de durée de vie restante (RUL)** : estimation du délai avant panne avec intervalle de confiance.
-5. **Protection automatique** : arrêt d'urgence ou délestage si seuil critique franchi.
-6. **Communication industrielle** : Modbus TCP via Ethernet, serveur web cognitif embarqué.
-7. **Stockage local** : carte SD avec journal des événements horodatés et données brutes au format CSV.
-8. **Reconfigurable** : changement de modèle TinyML selon la machine surveillée, sans modification matérielle.
-
----
-
-## Architecture matérielle
-
-| Composant | Rôle | Interface |
+| Component | Role | Interface |
 |:---|:---|:---|
-| STM32F407VET6 (Cortex-M4, 168 MHz) | Microcontrôleur principal, inférence TinyML | — |
-| MPU6050 (GY-521) | Accéléromètre 3 axes pour vibrations | I2C |
-| DS18B20 | Capteur de température de surface | OneWire |
-| Capteur de courant (ACS712 ou similaire) | Courant statorique pour MCSA | ADC |
-| W5500 | Module Ethernet (Modbus TCP, serveur web) | SPI |
-| MAX485 | Module RS485 (Modbus RTU, optionnel) | UART |
-| Carte microSD (module SPI) | Stockage des données et logs | SPI |
-| Convertisseur DC-DC 24V → 5V | Alimentation depuis tension industrielle | — |
-| Relais de sécurité | Coupure moteur en cas d'alerte critique | GPIO |
+| STM32F407VET6 (Cortex-M4, 168 MHz) | Main microcontroller, TinyML inference | — |
+| MPU6050 (GY-521) | 3-axis accelerometer for vibration | I2C |
+| DS18B20 | Surface temperature sensor | OneWire |
+| ACS712-30A | Stator current sensor | ADC |
+| W5500 | Ethernet module (Modbus TCP, web server) | SPI |
+| microSD card (SPI module) | Data and log storage | SPI |
+| DC-DC 24V→5V converter | Power supply from industrial voltage | — |
+| Safety relay | Motor cut-off on critical alert | GPIO |
 
----
+## Software Architecture
 
-## Architecture logicielle
+- **RTOS**: FreeRTOS (CMSIS_V2)
+- **File system**: FATFS
+- **TCP/IP stack**: Integrated in W5500 (WIZnet driver)
+- **Industrial protocol**: Modbus TCP
+- **On-board AI**: TensorFlow Lite for Microcontrollers
+- **Embedded HMI**: Web server (HTML/CSS)
+- **Languages**: C (firmware), Python (model training, analysis scripts)
 
-- **Noyau temps réel** : FreeRTOS (CMSIS_V2)
-- **Système de fichiers** : FATFS (FatFs Generic FAT File System)
-- **Pile TCP/IP** : intégrée au W5500 (driver WIZnet)
-- **Protocole industriel** : Modbus TCP
-- **IA embarquée** : TensorFlow Lite for Microcontrollers
-- **IHM cognitive** : serveur web embarqué (HTML/CSS)
-- **Langages** : C (firmware), Python (entraînement des modèles, scripts d'analyse)
-
-### Tâches FreeRTOS
-
-| Tâche | Priorité | Rôle |
-|:---|:---|:---|
-| SensorTask | Haute | Lecture périodique des capteurs (20 ms) |
-| TinyMLTask | Haute | Inférence du modèle sur les données acquises |
-| StorageTask | Normale | Écriture des données brutes et logs sur carte SD |
-| ModbusTask | Normale | Réponse aux requêtes Modbus TCP |
-| WebServerTask | Normale | Service des pages de l'interface web |
-| HeartbeatTask | Basse | Supervision, LED de statut |
-
----
-
-## Structure du dépôt
+## Repository Structure
